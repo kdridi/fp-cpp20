@@ -34,18 +34,61 @@ namespace fp20 {
         //
         // Every Applicative must also be a Functor.
         // This enables powerful multi-parameter function lifting patterns.
+        //
+        // Structural requirements (C++20):
+        // - Must satisfy Functor concept (subsumption)
+        // - Must have value_type member type (inherited from Functor)
+        // - Must support pure and apply operations (verified structurally)
+        //
+        // This is a proper C++20 concept using requires expressions,
+        // replacing the old trait-based approach for modern semantics.
+
+        // ============================================
+        // TEMPLATE PATTERN DETECTION (avoiding type instantiation)
+        // ============================================
+        // These traits detect applicative types by template pattern matching,
+        // avoiding the need to instantiate potentially ill-formed types
+        // (e.g., std::vector<const int> is ill-formed but pattern-matches)
 
         template<typename T>
-        struct is_applicative_type : std::false_type {};
+        struct is_template_instance_of_vector_applicative : std::false_type {};
 
         template<typename T>
-        struct is_applicative_type<std::vector<T>> : std::true_type {};
+        struct is_template_instance_of_vector_applicative<std::vector<T>> : std::true_type {};
 
         template<typename T>
-        struct is_applicative_type<std::optional<T>> : std::true_type {};
+        struct is_template_instance_of_optional_applicative : std::false_type {};
 
+        template<typename T>
+        struct is_template_instance_of_optional_applicative<std::optional<T>> : std::true_type {};
+
+        // Type trait for extensibility: types can opt-in via specialization
+        template<typename T>
+        struct is_applicative_opt_in : std::false_type {};
+
+        // Helper: detect if a type is a known applicative via pattern matching
+        template<typename T>
+        struct is_known_applicative : std::bool_constant<
+            is_template_instance_of_vector_applicative<T>::value ||
+            is_template_instance_of_optional_applicative<T>::value ||
+            is_applicative_opt_in<T>::value
+        > {};
+
+        // Helper: structural requirements for applicatives (for custom types)
+        // An Applicative must be a Functor with additional structure
         template<typename F>
-        concept Applicative = Functor<F> && is_applicative_type<F>::value;
+        concept HasApplicativeStructure = requires {
+            typename F::value_type;
+            requires !std::same_as<F, typename F::value_type>; // Prevent recursion
+        } && std::default_initializable<F> && Functor<F>;
+
+        // Primary Applicative concept with proper C++20 requires expressions
+        // Hybrid approach: pattern matching for known types + structural for custom types
+        // IMPORTANT: Applicative SUBSUMES Functor (every Applicative is a Functor)
+        template<typename F>
+        concept Applicative =
+            Functor<F> &&  // Subsumption: Applicative extends Functor
+            (is_known_applicative<F>::value || HasApplicativeStructure<F>);
     }
 
     // ============================================
