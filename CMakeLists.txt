@@ -27,6 +27,15 @@ target_include_directories(fp20 INTERFACE
 # Enable testing
 enable_testing()
 
+# Fetch Catch2 for runtime tests
+include(FetchContent)
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.5.0
+)
+FetchContent_MakeAvailable(Catch2)
+
 # TDD option - enforces test-first development
 option(FP20_STRICT_TDD "Enforce strict TDD: fail build if tests don't exist before implementation" ON)
 
@@ -37,11 +46,13 @@ add_executable(compilation_tests
 target_link_libraries(compilation_tests PRIVATE fp20)
 add_test(NAME CompilationTests COMMAND compilation_tests)
 
-# Runtime tests
+# Runtime tests (using Catch2)
 add_executable(unit_tests
-    tests/unit/test_main.cpp
+    tests/unit/test_functor_laws.cpp
+    tests/unit/test_functor_instances.cpp
+    tests/unit/test_functor_concept.cpp
 )
-target_link_libraries(unit_tests PRIVATE fp20)
+target_link_libraries(unit_tests PRIVATE fp20 Catch2::Catch2WithMain)
 add_test(NAME UnitTests COMMAND unit_tests)
 
 # Custom target to run all tests
