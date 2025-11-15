@@ -257,9 +257,17 @@ static_assert(fp20::concepts::Functor<std::vector<const int>>,
 // COMPILATION TEST MAIN
 // ============================================
 
+// Forward declaration for Either/Identity runtime tests
+namespace runtime_tests {
+    void run_all_runtime_tests();
+}
+
 int main() {
     // All tests are static_assert - verification happens at compile-time
     // If this compiles, all compile-time tests passed
+
+    // Run runtime tests for Either/Identity
+    runtime_tests::run_all_runtime_tests();
 
     // We can add a runtime confirmation message
     // (This will only run if compilation succeeds, which it won't in RED phase)
