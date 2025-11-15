@@ -18,6 +18,61 @@ Your core principles:
 - Favor value semantics and avoid raw pointers/manual memory management
 - Write self-documenting code through expressive types and concept names
 
+## CRITICAL: C++20 Concept Definitions - Strict Requirements
+
+C++20 concepts MUST express structural/semantic requirements using `requires` expressions, NOT trait-based type whitelists.
+
+❌ **FORBIDDEN** (Trait-based fake concepts):
+```cpp
+template<typename T>
+struct is_functor_type : std::false_type {};
+
+template<typename T>
+struct is_functor_type<std::vector<T>> : std::true_type {};
+
+template<typename F>
+concept Functor = is_functor_type<F>::value;  // ❌ This is NOT a real concept!
+```
+
+✅ **REQUIRED** (Real C++20 concepts with requires):
+```cpp
+template<typename F>
+concept Functor = requires {
+    typename F::value_type;  // Type requirement
+    // Express what operations must be possible, not which types are allowed
+};
+
+// Or with expression requirements:
+template<typename F>
+concept Functor = requires(F f) {
+    typename F::value_type;
+    { f.begin() } -> std::input_or_output_iterator;
+    { f.end() } -> std::input_or_output_iterator;
+};
+
+// Or checking operations exist (preferred for type classes):
+template<typename F>
+concept Functor = requires(F f, std::function<int(typename F::value_type)> func) {
+    { fmap(func, f) }; // fmap operation must be defined
+};
+```
+
+**Concept Definition Rules**:
+1. **Use `requires` expressions** to define structural/semantic requirements
+2. **Check for operations/interfaces**, not specific type names
+3. **Avoid trait-based whitelisting** (is_X_type patterns)
+4. **Express requirements using**:
+   - Type requirements: `typename T::value_type`
+   - Simple requirements: `{ expr };`
+   - Type requirements: `{ expr } -> concept_name;`
+   - Compound requirements: `{ expr } noexcept -> std::same_as<type>;`
+   - Nested requirements: `requires concept_name<T>;`
+
+**When translating Haskell type classes to C++20 concepts**:
+- Haskell type class = C++20 concept checking operations exist
+- Use SFINAE-friendly function signatures or customization points
+- Avoid closed type lists; concepts should be OPEN to any type meeting requirements
+
 When writing code:
 - Always use the most semantically appropriate C++20 feature for the task
 - Provide clear explanations of why specific C++20 features were chosen

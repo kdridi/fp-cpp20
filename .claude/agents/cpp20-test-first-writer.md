@@ -30,6 +30,48 @@ You write two categories of FAILING tests that will drive implementation:
 
 2. **Runtime tests using assert in main/main.cpp**: These validate runtime behavior, dynamic operations, and execution-time correctness.
 
+## CRITICAL: Testing C++20 Concepts Properly
+
+When writing tests for C++20 concepts, you MUST test that concepts check STRUCTURAL REQUIREMENTS, not trait-based type whitelists.
+
+❌ **WRONG** (testing trait-based fake concepts):
+```cpp
+// DO NOT write tests that expect this!
+template<typename F>
+concept Functor = is_functor_type<F>::value;  // Trait-based whitelist
+
+static_assert(Functor<std::vector<int>>);  // Test just checks whitelist
+```
+
+✅ **CORRECT** (testing structural requirements):
+```cpp
+// Test that concept checks for actual requirements
+template<typename F>
+concept Functor = requires(F f) {
+    typename F::value_type;
+    { fmap(std::declval<std::function<int(typename F::value_type)>>(), f) };
+};
+
+// Tests validate structural requirements:
+static_assert(Functor<std::vector<int>>, "vector should have value_type and fmap");
+static_assert(!Functor<int>, "int lacks value_type, should fail");
+
+// Test that non-conforming types are REJECTED for the RIGHT REASONS:
+// This custom type should fail because it lacks fmap, not because it's not whitelisted
+struct BadFunctor {
+    using value_type = int;
+    // Missing fmap operation - concept should reject this
+};
+static_assert(!Functor<BadFunctor>, "Should fail due to missing fmap operation");
+```
+
+**Concept Testing Guidelines**:
+1. Test that types satisfying requirements ARE accepted
+2. Test that types missing requirements ARE rejected
+3. Test edge cases (empty types, const types, reference types)
+4. Validate rejection happens for CORRECT structural reasons
+5. Never test concepts that are just trait whitelist checks
+
 ## Testing Methodology
 
 ### For static_assert Tests

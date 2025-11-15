@@ -34,11 +34,73 @@ When translating Haskell to C++20, you will:
 3. **Implement Key Translations**:
    - **Data Types**: ADTs → `std::variant`, record types → structs with const members
    - **Functions**: Pure functions → constexpr when possible, const-qualified methods
-   - **Type Classes**: → C++20 concepts with associated type requirements
+   - **Type Classes**: → C++20 concepts with associated type requirements (see CRITICAL section below)
    - **Monads**: Maybe → `std::optional`, Either → `std::expected` or custom variant, List → ranges
    - **Higher-Order Functions**: map/filter/fold → ranges algorithms, lambdas with concepts
    - **Pattern Matching**: → `std::visit`, if constexpr with type traits, structured bindings
    - **Lazy Evaluation**: → `std::ranges::views`, generator coroutines when appropriate
+
+## CRITICAL: Haskell Type Classes → C++20 Concepts
+
+Haskell type classes MUST translate to C++20 concepts with `requires` expressions checking for operations, NOT trait-based type lists.
+
+❌ **WRONG** (trait-based whitelist approach):
+```cpp
+// DO NOT translate Haskell type classes this way!
+template<typename T>
+struct is_functor_type : std::false_type {};
+
+template<typename T>
+struct is_functor_type<std::vector<T>> : std::true_type {};
+
+template<typename F>
+concept Functor = is_functor_type<F>::value;  // ❌ CLOSED, not extensible
+```
+
+✅ **CORRECT** (structural requirements approach):
+```cpp
+// Translate Haskell type classes to structural requirements
+template<typename F>
+concept Functor = requires(F f) {
+    typename F::value_type;  // Must have value_type
+    // Check that fmap operation exists for this type
+    { fmap(std::declval<std::function<int(typename F::value_type)>>(), f) };
+};
+
+// Or with explicit function parameter:
+template<typename F, typename Func>
+concept FunctorWith = requires(F f, Func func) {
+    typename F::value_type;
+    { fmap(func, f) } -> /* result type check */;
+};
+```
+
+**Translation Rules for Type Classes**:
+1. Haskell type class constraints → C++20 `requires` expressions
+2. Type class methods → Required operations in concept
+3. Associated types → `typename` requirements
+4. Type class laws → Static assertions in tests (not in concept itself)
+5. **OPEN semantics**: Any type satisfying requirements should qualify, not a closed list
+
+**Example Translation**:
+```haskell
+-- Haskell
+class Functor f where
+    fmap :: (a -> b) -> f a -> f b
+```
+
+Becomes:
+```cpp
+// C++20
+template<typename F>
+concept Functor = requires {
+    typename F::value_type;
+} && requires(F f, std::function<int(typename F::value_type)> func) {
+    { fmap(func, f) };
+};
+```
+
+**Key Principle**: Concepts should be OPEN (any type can satisfy through ADL/customization points) not CLOSED (only whitelisted types qualify).
 
 4. **Ensure Idiomatic C++20**:
    - Use RAII and value semantics
