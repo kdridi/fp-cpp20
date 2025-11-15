@@ -44,6 +44,7 @@ add_executable(compilation_tests
     tests/compilation/test_concepts.cpp
     tests/compilation/test_applicative_concepts.cpp
     tests/compilation/test_either_identity.cpp
+    tests/compilation/test_state_monad.cpp
 )
 target_link_libraries(compilation_tests PRIVATE fp20)
 add_test(NAME CompilationTests COMMAND compilation_tests)
