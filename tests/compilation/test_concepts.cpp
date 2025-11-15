@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <optional>
+#include <list>
 #include <string>
 #include <type_traits>
 
@@ -74,6 +75,17 @@ static_assert(fp20::concepts::Functor<std::vector<void*>>,
 
 static_assert(fp20::concepts::Functor<std::optional<bool>>,
     "std::optional<bool> should satisfy Functor concept");
+
+// Test 1.7: std::list<T> should satisfy Functor concept (Story-2 Increment 1)
+// TDD RED: This will FAIL initially - std::list not yet recognized
+static_assert(fp20::concepts::Functor<std::list<int>>,
+    "std::list<int> should satisfy Functor concept");
+
+static_assert(fp20::concepts::Functor<std::list<std::string>>,
+    "std::list<std::string> should satisfy Functor concept");
+
+static_assert(fp20::concepts::Functor<std::list<double>>,
+    "std::list<double> should satisfy Functor concept");
 
 } // namespace test_functor_concept
 

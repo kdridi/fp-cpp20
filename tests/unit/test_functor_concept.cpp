@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <optional>
+#include <list>
 #include <string>
 
 // Test fixture for compile-time concept checking
@@ -70,6 +71,26 @@ TEST_CASE("Functor fmap exists", "[functor][fmap][tdd]") {
         auto result = fp20::fmap(double_it, no_value);
 
         REQUIRE_FALSE(result.has_value());
+    }
+
+    SECTION("fmap can be called on std::list (Story-2 Increment 1)") {
+        std::list<int> lst{1, 2, 3, 4, 5};
+        auto multiply_by_2 = [](int x) { return x * 2; };
+
+        // TDD RED: This will FAIL - std::list not yet supported
+        auto result = fp20::fmap(multiply_by_2, lst);
+
+        REQUIRE(result == std::list<int>{2, 4, 6, 8, 10});
+    }
+
+    SECTION("fmap on empty std::list") {
+        std::list<int> empty_list;
+        auto add_ten = [](int x) { return x + 10; };
+
+        // TDD RED: This will FAIL - std::list not yet supported
+        auto result = fp20::fmap(add_ten, empty_list);
+
+        REQUIRE(result.empty());
     }
 }
 

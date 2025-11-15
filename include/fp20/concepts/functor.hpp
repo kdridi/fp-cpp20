@@ -17,6 +17,7 @@
 #include <type_traits>
 #include <vector>
 #include <optional>
+#include <list>
 
 namespace fp20 {
     namespace concepts {
@@ -40,6 +41,9 @@ namespace fp20 {
 
         template<typename T>
         struct is_functor_type<std::optional<T>> : std::true_type {};
+
+        template<typename T>
+        struct is_functor_type<std::list<T>> : std::true_type {};
 
         template<typename F>
         concept Functor = is_functor_type<F>::value;
@@ -70,6 +74,11 @@ namespace fp20 {
     template<typename T, typename NewType>
     struct rebind_functor<std::optional<T>, NewType> {
         using type = std::optional<NewType>;
+    };
+
+    template<typename T, typename NewType>
+    struct rebind_functor<std::list<T>, NewType> {
+        using type = std::list<NewType>;
     };
 
     // ============================================
@@ -103,5 +112,16 @@ namespace fp20 {
             return std::optional<ResultType>{f(*opt)};
         }
         return std::nullopt;
+    }
+
+    // fmap for std::list<T>
+    template<typename Func, typename T>
+    auto fmap(Func&& f, const std::list<T>& lst) -> std::list<decltype(f(std::declval<T>()))> {
+        using ResultType = decltype(f(std::declval<T>()));
+        std::list<ResultType> result;
+        for (const auto& elem : lst) {
+            result.push_back(f(elem));
+        }
+        return result;
     }
 }

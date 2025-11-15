@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <optional>
+#include <list>
 #include <functional>
 
 // Identity function
@@ -39,6 +40,15 @@ TEST_CASE("Functor Identity Law", "[functor][laws][tdd]") {
         // fmap id none == none
         auto result_none = fp20::fmap(identity, none);
         REQUIRE(result_none == none);
+    }
+
+    SECTION("List satisfies identity law (Story-2 Increment 1)") {
+        std::list<int> lst{1, 2, 3, 4, 5};
+
+        // TDD RED: This will FAIL - std::list not yet supported
+        // fmap id lst == lst
+        auto result = fp20::fmap(identity, lst);
+        REQUIRE(result == lst);
     }
 }
 
@@ -77,6 +87,18 @@ TEST_CASE("Functor Composition Law", "[functor][laws][tdd]") {
 
         REQUIRE(left == right);
         REQUIRE_FALSE(left.has_value());
+    }
+
+    SECTION("List satisfies composition law (Story-2 Increment 1)") {
+        std::list<int> lst{10, 20, 30};
+
+        // TDD RED: This will FAIL - std::list not yet supported
+        // fmap (f . g) lst == (fmap f . fmap g) lst
+        auto left = fp20::fmap(composed, lst);
+        auto right = fp20::fmap(multiply_two, fp20::fmap(add_one, lst));
+
+        REQUIRE(left == right);
+        REQUIRE(left == std::list<int>{22, 42, 62});
     }
 }
 
