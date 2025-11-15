@@ -42,6 +42,7 @@ option(FP20_STRICT_TDD "Enforce strict TDD: fail build if tests don't exist befo
 # Compilation tests (static_assert)
 add_executable(compilation_tests
     tests/compilation/test_concepts.cpp
+    tests/compilation/test_applicative_concepts.cpp
 )
 target_link_libraries(compilation_tests PRIVATE fp20)
 add_test(NAME CompilationTests COMMAND compilation_tests)
@@ -51,6 +52,8 @@ add_executable(unit_tests
     tests/unit/test_functor_laws.cpp
     tests/unit/test_functor_instances.cpp
     tests/unit/test_functor_concept.cpp
+    tests/unit/test_applicative_concept.cpp
+    tests/unit/test_applicative_laws.cpp
 )
 target_link_libraries(unit_tests PRIVATE fp20 Catch2::Catch2WithMain)
 add_test(NAME UnitTests COMMAND unit_tests)
