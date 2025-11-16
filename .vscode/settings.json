@@ -4,9 +4,11 @@
     "*.cpp": "cpp"
   },
   "C_Cpp.default.includePath": [
+    "${workspaceFolder}/include/**",
     "${workspaceFolder}/include",
     "${workspaceFolder}/include/fp20",
-    "${workspaceFolder}/include/fp20/concepts"
+    "${workspaceFolder}/include/fp20/concepts",
+    "${workspaceFolder}/include/fp20/monads"
   ],
   "C_Cpp.default.compilerPath": "/usr/bin/clang++",
   "C_Cpp.default.cppStandard": "c++20",

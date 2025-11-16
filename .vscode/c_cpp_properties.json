@@ -3,9 +3,12 @@
     {
       "name": "Mac",
       "includePath": [
+        "${workspaceFolder}/include/**",
         "${workspaceFolder}/include",
         "${workspaceFolder}/include/fp20",
         "${workspaceFolder}/include/fp20/concepts",
+        "${workspaceFolder}/include/fp20/monads",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1",
         "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
       ],
       "defines": [],
