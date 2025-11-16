@@ -360,13 +360,13 @@ static_assert(requires(List<int> xs, List<int> ys) {
 
 // guard for filtering in comprehensions
 static_assert(requires {
-    { guard<int>(true) } -> std::same_as<List<int>>;
-    { guard<int>(false) } -> std::same_as<List<int>>;
+    { guard<int>(true) } -> std::same_as<List<Unit>>;
+    { guard<int>(false) } -> std::same_as<List<Unit>>;
 }, "guard should exist for comprehensions");
 
 // guard returns singleton unit list or empty
 static_assert(requires {
-    { guard<int>(std::declval<bool>()) } -> std::same_as<List<int>>;
+    { guard<int>(std::declval<bool>()) } -> std::same_as<List<Unit>>;
 }, "guard should be usable in comprehensions");
 
 // ----------------------------------------------------------------------------
@@ -1143,8 +1143,8 @@ void test_list_predicates() {
 void test_guard_comprehension() {
     // Test: guard returns singleton or empty
     {
-        List<int> true_guard = guard<int>(true);
-        List<int> false_guard = guard<int>(false);
+        List<Unit> true_guard = guard<int>(true);
+        List<Unit> false_guard = guard<int>(false);
 
         assert(true_guard.size() == 1);
         assert(false_guard.empty());
@@ -1156,7 +1156,7 @@ void test_guard_comprehension() {
 
         // [x | x <- nums, even x]
         auto evens = fp20::bind(nums, [](int x) {
-            return fp20::bind(guard<int>(x % 2 == 0), [x](int) {
+            return fp20::bind(guard<int>(x % 2 == 0), [x](Unit) {
                 return pure<List>(x);
             });
         });
@@ -1175,8 +1175,8 @@ void test_complex_list_comprehension() {
 
         auto pairs = fp20::bind(xs, [ys](int x) {
             return fp20::bind(ys, [x](int y) {
-                return fp20::bind(guard<std::pair<int,int>>((x + y) % 2 == 0),
-                    [x, y](auto) {
+                return fp20::bind(guard<int>((x + y) % 2 == 0),
+                    [x, y](Unit) {
                         return pure<List>(std::pair{x, y});
                     }
                 );

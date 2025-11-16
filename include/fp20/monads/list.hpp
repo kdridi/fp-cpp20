@@ -256,6 +256,18 @@ constexpr auto mplus(const List<A>& list1, List<A>&& list2) -> List<A> {
     return result;
 }
 
+/**
+ * @brief Move-optimized mplus overload (both rvalues)
+ */
+template<typename A>
+constexpr auto mplus(List<A>&& list1, List<A>&& list2) -> List<A> {
+    list1.reserve(list1.size() + list2.size());
+    list1.insert(list1.end(),
+                 std::make_move_iterator(list2.begin()),
+                 std::make_move_iterator(list2.end()));
+    return std::move(list1);
+}
+
 // ============================================================================
 // GUARD FUNCTION (Essential for List Comprehensions)
 // ============================================================================
@@ -264,43 +276,67 @@ constexpr auto mplus(const List<A>& list1, List<A>&& list2) -> List<A> {
  * @brief guard for conditional filtering in list comprehensions
  *
  * Used in monadic list comprehensions to filter results based on predicates.
- * Returns a singleton list if condition is true, empty list otherwise.
+ * Returns a singleton list with Unit if condition is true, empty list otherwise.
  *
  * Pattern in Haskell:
- * guard :: Bool -> [()]
- * guard True = [()]
- * guard False = []
+ * guard :: MonadPlus m => Bool -> m ()
+ * For List: guard True = [()], guard False = []
  *
  * Usage in comprehensions:
  * @code
  * // [x | x <- [1..10], even x]
  * bind(range(1, 11), [](int x) {
- *   return bind(guard<int>(x % 2 == 0), [=](int) {
+ *   return bind(guard<int>(x % 2 == 0), [=](auto) {
  *     return pure<List>(x);
  *   });
  * });
  * @endcode
  *
- * @param condition Predicate to check
- * @return Singleton list with default-constructed value if true, empty list if false
- */
-template<typename A>
-constexpr auto guard(bool condition) -> List<A> {
-    if (condition) {
-        return List<A>{A{}};
-    } else {
-        return List<A>{};
-    }
-}
-
-/**
- * @brief guard returning Unit (backward compatibility)
+ * NOTE: The template parameter A is for type inference context ONLY.
+ * guard<A>(cond) ALWAYS returns List<Unit>, regardless of A.
+ * The parameter helps the compiler deduce types in complex expressions.
  *
  * @param condition Predicate to check
  * @return Singleton [Unit{}] if true, [] if false
  */
+template<typename A>
 constexpr auto guard(bool condition) -> List<Unit> {
-    return guard<Unit>(condition);
+    if (condition) {
+        return List<Unit>{Unit{}};
+    } else {
+        return List<Unit>{};
+    }
+}
+
+/**
+ * @brief guard_optional for std::optional monad
+ *
+ * Returns Some(Unit{}) if condition is true, std::nullopt otherwise.
+ * Used for conditional filtering in optional comprehensions.
+ *
+ * Pattern in Haskell:
+ * guard :: MonadPlus m => Bool -> m ()
+ * For Maybe: guard True = Just (), guard False = Nothing
+ *
+ * Usage in comprehensions:
+ * @code
+ * bind(optional_value, [](int x) {
+ *   return bind(guard_optional<int>(x > 0), [x](auto) {
+ *     return return_<std::optional>(x * 2);
+ *   });
+ * });
+ * @endcode
+ *
+ * @param condition Predicate to check
+ * @return Some(Unit{}) if true, nullopt if false
+ */
+template<typename A>
+constexpr auto guard_optional(bool condition) noexcept -> std::optional<Unit> {
+    if (condition) {
+        return std::optional<Unit>{Unit{}};
+    } else {
+        return std::nullopt;
+    }
 }
 
 // ============================================================================
