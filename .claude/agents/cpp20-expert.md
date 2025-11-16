@@ -121,10 +121,11 @@ ctest --test-dir build --output-on-failure
 - If tests fail, verify implementation is correct
 
 ### CRITICAL RULES
-- ❌ NEVER run: `g++ -o /tmp/test_xxx`
-- ❌ NEVER run: individual compilation outside project build
-- ❌ NEVER create temporary binaries for verification
+- ❌ NEVER run: `g++ -o /tmp/test_xxx` (causes permission prompts)
+- ❌ NEVER create files outside project directory
 - ✅ ALWAYS use: `cmake --build build` from project root
 - ✅ ALWAYS verify with: `ctest --test-dir build`
+- ✅ For quick tests: Use `build/sandbox/` NOT /tmp
 - ✅ Implementation must be in: `/Users/kdridi/Documents/fp++20/include/`
+- ✅ All temporary files in: `/Users/kdridi/Documents/fp++20/build/sandbox/`
 - ✅ Report test results as GREEN phase evidence

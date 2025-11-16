@@ -176,11 +176,12 @@ cmake --build build
 - The error messages prove tests are properly written and failing for the right reasons
 
 ### CRITICAL RULES
-- ❌ NEVER run: `g++ -o /tmp/test_xxx`
-- ❌ NEVER run: individual compilation outside project build
-- ❌ NEVER create temporary binaries for verification
+- ❌ NEVER run: `g++ -o /tmp/test_xxx` (causes permission prompts)
+- ❌ NEVER create files outside project directory
 - ✅ ALWAYS use: `cmake --build build` from project root
 - ✅ Tests must be in: `/Users/kdridi/Documents/fp++20/tests/compilation/`
+- ✅ For quick checks: Use `build/sandbox/` NOT /tmp
+- ✅ All temporary files in: `/Users/kdridi/Documents/fp++20/build/sandbox/`
 - ✅ Report compilation output as RED phase evidence
 
 ## When You Need Clarification
