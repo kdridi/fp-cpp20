@@ -48,6 +48,7 @@ add_executable(compilation_tests
     tests/compilation/test_reader_monad.cpp
     tests/compilation/test_writer_monad.cpp
     tests/compilation/test_io_monad.cpp
+    tests/compilation/test_list_monad.cpp
 )
 target_link_libraries(compilation_tests PRIVATE fp20)
 add_test(NAME CompilationTests COMMAND compilation_tests)
