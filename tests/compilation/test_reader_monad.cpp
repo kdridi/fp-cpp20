@@ -46,8 +46,13 @@
 
 // This include MUST fail - no implementation exists yet
 #include "fp20/reader.hpp"
+#include "fp20/reader_concepts.hpp"
 
 using namespace fp20;
+
+// Explicitly prefer fp20::bind over std::bind and fp20::apply over std::apply
+using fp20::bind;
+using fp20::apply;
 
 // ============================================================================
 // TEST CONFIGURATION TYPES
@@ -174,7 +179,7 @@ static_assert(requires(
     Reader<int, std::function<std::string(int)>> rf,
     Reader<int, int> rx
 ) {
-    { apply(rf, rx) } -> std::same_as<Reader<int, std::string>>;
+    { fp20::apply(rf, rx) } -> std::same_as<Reader<int, std::string>>;
 });
 
 // apply shares environment between function and argument
@@ -182,7 +187,7 @@ static_assert(requires(
     Reader<DatabaseConfig, std::function<int(std::string)>> rf,
     Reader<DatabaseConfig, std::string> rx
 ) {
-    { apply(rf, rx) } -> std::same_as<Reader<DatabaseConfig, int>>;
+    { fp20::apply(rf, rx) } -> std::same_as<Reader<DatabaseConfig, int>>;
 });
 
 // ----------------------------------------------------------------------------
@@ -194,7 +199,7 @@ static_assert(requires(
     Reader<int, std::string> m,
     std::function<Reader<int, std::size_t>(std::string)> k
 ) {
-    { bind(m, k) } -> std::same_as<Reader<int, std::size_t>>;
+    { fp20::bind(m, k) } -> std::same_as<Reader<int, std::size_t>>;
 });
 
 // bind threads environment through computation
@@ -202,7 +207,7 @@ static_assert(requires(
     Reader<DatabaseConfig, int> m,
     std::function<Reader<DatabaseConfig, std::string>(int)> k
 ) {
-    { bind(m, k) } -> std::same_as<Reader<DatabaseConfig, std::string>>;
+    { fp20::bind(m, k) } -> std::same_as<Reader<DatabaseConfig, std::string>>;
 });
 
 // bind can chain multiple computations
@@ -211,12 +216,12 @@ static_assert(requires(
     std::function<Reader<int, std::string>(int)> k1,
     std::function<Reader<int, bool>(std::string)> k2
 ) {
-    { bind(bind(m1, k1), k2) } -> std::same_as<Reader<int, bool>>;
+    { fp20::bind(fp20::bind(m1, k1), k2) } -> std::same_as<Reader<int, bool>>;
 });
 
 // bind works with lambda returning Reader
 static_assert(requires(Reader<int, std::string> m) {
-    { bind(m, [](std::string s) {
+    { fp20::bind(m, [](std::string s) {
         return pure<int>(s.size());
     }) } -> std::same_as<Reader<int, std::size_t>>;
 });
@@ -464,7 +469,7 @@ void test_applicative_apply() {
 
     Reader<int, int> rx([](int env) { return env * 2; });
 
-    auto result = apply(rf, rx);
+    auto result = fp20::apply(rf, rx);
     // With env=10: rf gives (x -> x + 10), rx gives 20, result = 20 + 10 = 30
     assert(result.runReader(10) == 30);
 
@@ -484,7 +489,7 @@ void test_monad_bind_basic() {
 
     // Test: bind can access environment multiple times
     auto r2 = bind(ask<int>(), [](int x) {
-        return bind(ask<int>(), [x](int y) {
+        return fp20::bind(ask<int>(), [x](int y) {
             return pure<int>(x + y);  // x and y are same environment
         });
     });
@@ -497,7 +502,7 @@ void test_monad_bind_complex() {
     auto computation = bind(
         asks<DatabaseConfig>([](const DatabaseConfig& c) { return c.port; }),
         [](int port) {
-            return bind(
+            return fp20::bind(
                 asks<DatabaseConfig>([](const DatabaseConfig& c) { return c.host; }),
                 [port](const std::string& host) {
                     return pure<DatabaseConfig>(host + ":" + std::to_string(port));
@@ -551,7 +556,7 @@ void test_monad_law_associativity() {
 
     auto lhs = bind(bind(m, f), g);
     auto rhs = bind(m, [f, g](int x) {
-        return bind(f(x), g);
+        return fp20::bind(f(x), g);
     });
 
     assert(lhs.runReader(10) == rhs.runReader(10));
@@ -563,7 +568,7 @@ void test_reader_law_ask_ask() {
     // ask >>= \x -> ask >>= \y -> pure(x, y)  ≡  ask >>= \x -> pure(x, x)
 
     auto lhs = bind(ask<int>(), [](int x) {
-        return bind(ask<int>(), [x](int y) {
+        return fp20::bind(ask<int>(), [x](int y) {
             return pure<int>(x + y);  // Using sum instead of pair for simplicity
         });
     });
@@ -621,13 +626,13 @@ void test_configuration_example_basic() {
 
 void test_configuration_example_composition() {
     // Test: Building connection string from config
-    auto buildConnectionString = bind(
+    auto buildConnectionString = fp20::bind(
         asks<DatabaseConfig>([](const DatabaseConfig& c) { return c.host; }),
         [](const std::string& host) {
-            return bind(
+            return fp20::bind(
                 asks<DatabaseConfig>([](const DatabaseConfig& c) { return c.port; }),
                 [host](int port) {
-                    return bind(
+                    return fp20::bind(
                         asks<DatabaseConfig>([](const DatabaseConfig& c) { return c.use_ssl; }),
                         [host, port](bool ssl) {
                             std::string protocol = ssl ? "https://" : "http://";
@@ -686,10 +691,10 @@ void test_dependency_injection_pattern() {
         });
     };
 
-    auto processWithLogging = bind(
+    auto processWithLogging = fp20::bind(
         logMessage("Starting process"),
-        [](const std::string& start_msg) {
-            return bind(
+        [logMessage](const std::string& start_msg) {
+            return fp20::bind(
                 logMessage("Process complete"),
                 [start_msg](const std::string& end_msg) {
                     return pure<Logger>(start_msg + " | " + end_msg);
@@ -710,13 +715,13 @@ void test_dependency_injection_pattern() {
 
 void test_reader_with_multiple_asks() {
     // Test: Multiple asks in same computation
-    auto computation = bind(
+    auto computation = fp20::bind(
         asks<DatabaseConfig>([](const DatabaseConfig& c) { return c.host; }),
         [](const std::string& host) {
-            return bind(
+            return fp20::bind(
                 asks<DatabaseConfig>([](const DatabaseConfig& c) { return c.port; }),
                 [host](int port) {
-                    return bind(
+                    return fp20::bind(
                         asks<DatabaseConfig>([](const DatabaseConfig& c) {
                             return c.max_connections;
                         }),
