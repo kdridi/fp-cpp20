@@ -53,22 +53,67 @@ fp++20/
 ### Requirements
 - C++20 compliant compiler (GCC 10+, Clang 10+, MSVC 2019+)
 - CMake 3.20+
+- Ninja (recommended for 2x faster builds): `brew install ninja`
+- CCache (optional, 10x faster rebuilds): `brew install ccache`
 
-### Build
+### Quick Start (TURBO MODE - Recommended)
+
+```bash
+# Install build tools (optional but recommended)
+brew install ninja ccache
+
+# One-command setup
+./setup-turbo-build.sh
+
+# Or manually:
+rm -rf build && mkdir build && cd build
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+ninja
+```
+
+### Performance Benchmark
+
+```bash
+./benchmark-build.sh
+```
+
+**Expected Performance:**
+- Incremental build (1 file): **< 2 seconds**
+- No-change build: **< 0.01 seconds**
+- Full rebuild: **~15 seconds** (without ccache)
+
+See [BUILD_OPTIMIZATION_REPORT.md](BUILD_OPTIMIZATION_REPORT.md) and [QUICK_START.md](QUICK_START.md) for details.
+
+### Traditional Build (slower, not recommended)
+
 ```bash
 mkdir build && cd build
 cmake ..
-cmake --build .
+cmake --build . -j8
 ```
 
 ### Run Tests (TDD Workflow)
 ```bash
-# Run all tests
-ctest --output-on-failure
+# Run all tests in parallel
+ctest --parallel 8 --output-on-failure
 
 # Or use custom target
-cmake --build . --target test_all
+ninja test_all
+
+# Individual test suites
+ninja compilation_tests && ./compilation_tests
+ninja unit_tests && ./unit_tests
 ```
+
+### Auto-Discovery
+
+**Tests are automatically discovered!** Just create a file in:
+- `tests/compilation/*.cpp` - Compilation tests (static_assert)
+- `tests/unit/*.cpp` - Unit tests (Catch2)
+- `tests/runtime/*.cpp` - Runtime tests
+- `tests/properties/*.cpp` - Property-based tests
+
+No need to modify CMakeLists.txt!
 
 ## TDD Workflow
 
