@@ -13,12 +13,12 @@ test_runner
 main
 
 # IDE and editor files
-.vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+.cache/
 
 # CMake generated files
 CMakeCache.txt

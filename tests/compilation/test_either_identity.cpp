@@ -14,8 +14,8 @@
 #include <iostream>
 
 // Include the implementations first
-#include <fp20/either.hpp>
-#include <fp20/identity.hpp>
+#include <fp20/monads/either.hpp>
+#include <fp20/monads/identity.hpp>
 
 // Then the concepts
 #include <fp20/concepts/functor.hpp>
@@ -23,7 +23,7 @@
 #include <fp20/concepts/monad.hpp>
 
 // Finally the concept opt-ins (must be last)
-#include <fp20/either_identity_concepts.hpp>
+#include <fp20/concepts/either_identity_concepts.hpp>
 
 // ============================================
 // COMPILE-TIME TESTS (static_assert)

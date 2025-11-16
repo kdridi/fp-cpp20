@@ -30,7 +30,7 @@
 #include <iostream>
 
 // Include the implementation (will FAIL - doesn't exist yet)
-#include <fp20/state.hpp>
+#include <fp20/monads/state.hpp>
 
 // Then the concepts
 #include <fp20/concepts/functor.hpp>
@@ -38,7 +38,7 @@
 #include <fp20/concepts/monad.hpp>
 
 // Finally the concept opt-ins (must be last)
-#include <fp20/state_concepts.hpp>
+#include <fp20/concepts/state_concepts.hpp>
 
 // ============================================
 // COMPILE-TIME TESTS (static_assert)

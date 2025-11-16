@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build FP++20",
+      "type": "shell",
+      "command": "cmake --build build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "ctest --test-dir build --output-on-failure",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "dependsOn": ["Build FP++20"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean Build",
+      "type": "shell",
+      "command": "rm -rf build && cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build build",
+      "problemMatcher": []
+    }
+  ]
+}

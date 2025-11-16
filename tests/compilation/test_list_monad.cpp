@@ -48,13 +48,13 @@
 #include <numeric>
 
 // This include MUST fail - no implementation exists yet
-#include "fp20/list.hpp"
-#include "fp20/list_concepts.hpp"
+#include <fp20/monads/list.hpp>
+#include <fp20/concepts/list_concepts.hpp>
 
 // Also need the core concepts
-#include "fp20/concepts/functor.hpp"
-#include "fp20/concepts/applicative.hpp"
-#include "fp20/concepts/monad.hpp"
+#include <fp20/concepts/functor.hpp>
+#include <fp20/concepts/applicative.hpp>
+#include <fp20/concepts/monad.hpp>
 
 using namespace fp20;
 

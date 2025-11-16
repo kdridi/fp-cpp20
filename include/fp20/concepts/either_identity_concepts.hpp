@@ -9,8 +9,8 @@
 #include <fp20/concepts/functor.hpp>
 #include <fp20/concepts/applicative.hpp>
 #include <fp20/concepts/monad.hpp>
-#include <fp20/either.hpp>
-#include <fp20/identity.hpp>
+#include <fp20/monads/either.hpp>
+#include <fp20/monads/identity.hpp>
 
 namespace fp20::concepts {
     // ============================================

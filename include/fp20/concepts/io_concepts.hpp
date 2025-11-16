@@ -46,7 +46,7 @@
 #include <fp20/concepts/functor.hpp>
 #include <fp20/concepts/applicative.hpp>
 #include <fp20/concepts/monad.hpp>
-#include <fp20/io.hpp>
+#include <fp20/monads/io.hpp>
 
 namespace fp20::concepts {
 

@@ -45,8 +45,8 @@
 #include <vector>
 
 // This include MUST fail - no implementation exists yet
-#include "fp20/reader.hpp"
-#include "fp20/reader_concepts.hpp"
+#include <fp20/monads/reader.hpp>
+#include <fp20/concepts/reader_concepts.hpp>
 
 using namespace fp20;
 

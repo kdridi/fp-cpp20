@@ -51,11 +51,11 @@
 #include <utility>
 
 // This include MUST fail - no implementation exists yet
-#include "fp20/writer.hpp"
-#include "fp20/writer_concepts.hpp"
+#include <fp20/monads/writer.hpp>
+#include <fp20/concepts/writer_concepts.hpp>
 
 // Include Monoid concept (may need to be created)
-#include "fp20/concepts/monoid.hpp"
+#include <fp20/concepts/monoid.hpp>
 
 using namespace fp20;
 
