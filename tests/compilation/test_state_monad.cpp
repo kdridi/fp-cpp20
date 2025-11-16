@@ -208,9 +208,11 @@ namespace test_state_primitives {
 
         // put should work with lvalue and rvalue
         static_assert(requires {
-            int x = 42;
-            put<int>(x);
-            put<int>(42);
+            []() {
+                int x = 42;
+                put<int>(x);
+                put<int>(42);
+            }();
         }, "put should accept both lvalue and rvalue");
     }
 
