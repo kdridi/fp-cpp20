@@ -158,6 +158,31 @@ Before presenting tests, ensure:
 9. Tests do NOT assume any implementation details
 10. You have verified this is the RED phase (before implementation)
 
+## VERIFICATION STRATEGY (NEVER USE /tmp)
+
+### Writing Tests
+1. Add tests to `/Users/kdridi/Documents/fp++20/tests/compilation/test_[feature].cpp`
+2. Tests are ALREADY integrated in CMakeLists.txt (compilation_tests target)
+3. DO NOT manually compile with g++ or create /tmp binaries
+
+### Verifying Tests Fail (RED Phase)
+```bash
+cd /Users/kdridi/Documents/fp++20
+cmake --build build
+```
+
+- This builds ONCE using the project's CMake configuration
+- If you get compilation errors about missing types/functions, that's the RED phase confirmation
+- The error messages prove tests are properly written and failing for the right reasons
+
+### CRITICAL RULES
+- ❌ NEVER run: `g++ -o /tmp/test_xxx`
+- ❌ NEVER run: individual compilation outside project build
+- ❌ NEVER create temporary binaries for verification
+- ✅ ALWAYS use: `cmake --build build` from project root
+- ✅ Tests must be in: `/Users/kdridi/Documents/fp++20/tests/compilation/`
+- ✅ Report compilation output as RED phase evidence
+
 ## When You Need Clarification
 
 Ask for additional information if:

@@ -286,3 +286,56 @@ Before providing a decision, verify:
 6. No steps are being skipped
 
 Your role is critical to maintaining TDD discipline and proper agent coordination. Be thorough, be strict, and be clear.
+
+## Build System Integration Rules
+
+### Compilation Strategy for All Agents
+
+**REQUIRED**: All agents must use the project-level CMake build system.
+
+**FORBIDDEN PATTERNS**:
+- ❌ `g++ -o /tmp/test_xxx ...` (creates temporary untracked binaries)
+- ❌ `clang++ -o /tmp/...` (same problem)
+- ❌ Any compilation outside the build/ directory
+- ❌ Ad-hoc binary creation for verification
+
+**REQUIRED PATTERN**:
+```bash
+cd /Users/kdridi/Documents/fp++20
+cmake --build build              # Compiles all tests using CMakeLists.txt
+ctest --test-dir build           # Runs tests to verify behavior
+```
+
+**Why This Matters**:
+- CMakeLists.txt already defines compilation_tests and unit_tests targets
+- Build artifacts go to `build/` (git-ignored, clean)
+- No /tmp pollution, no macOS permission prompts
+- Single source of truth for compilation rules
+- User can review code before execution
+
+### Verification Checkpoints
+
+**At State 2 (RED Phase Checkpoint)**:
+- Agent should report: "Tests added to `/Users/kdridi/Documents/fp++20/tests/compilation/test_[feature].cpp`"
+- tdd-enforcer verifies by running: `cmake --build build` (should fail if feature missing)
+
+**At State 4 (GREEN Phase Checkpoint)**:
+- Agent should report: "Implementation added to `/Users/kdridi/Documents/fp++20/include/...`"
+- tdd-enforcer verifies by running: `cmake --build build && ctest --test-dir build` (should pass)
+
+### Agent Compliance Enforcement
+
+**cpp20-test-first-writer** must:
+- Place tests in `/Users/kdridi/Documents/fp++20/tests/compilation/`
+- Verify with: `cmake --build build` (from project root)
+- Report: compilation output as evidence of RED phase
+
+**cpp20-expert** must:
+- Place implementation in `/Users/kdridi/Documents/fp++20/include/`
+- Verify with: `cmake --build build && ctest --test-dir build` (from project root)
+- Report: test pass/fail status as evidence of GREEN phase
+
+**tdd-enforcer** must:
+- Use: `cmake --build build` for compilation (State 2)
+- Use: `ctest --test-dir build` for verification (State 4)
+- Never accept /tmp binary creation as verification method
